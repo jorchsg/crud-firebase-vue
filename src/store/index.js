@@ -13,14 +13,16 @@ export default createStore({
     },
   },
   mutations: {
+    load(state, payload) {
+      state.tareas = payload;
+    },
+
     set(state, payload) {
       state.tareas.push(payload);
-      localStorage.setItem('tareas', JSON.stringify(state.tareas));
     },
 
     delete(state, payload) {
       state.tareas = state.tareas.filter(item => item.id !== payload);
-      localStorage.setItem('tareas', JSON.stringify(state.tareas));
     },
 
     edit(state, payload) {
@@ -29,21 +31,48 @@ export default createStore({
         return
       }
       state.tarea = state.tareas.find(item => item.id === payload);
-      localStorage.setItem('tareas', JSON.stringify(state.tareas));
     },
 
     update(state, payload) {
       state.tareas = state.tareas.map(item => item.id === payload.id ? payload : item);
-      localStorage.setItem('tareas', JSON.stringify(state.tareas));
       router.push('/');
-    },
-    upload(state, payload) {
-      state.tareas = payload;
     }
   },
   actions: {
-    setTareas({ commit }, tarea) {
-      commit('set', tarea);
+    async loadLocalStorage({ commit }) {
+      try {
+        const response = await fetch('https://crud-form-vue-default-rtdb.firebaseio.com/tareas.json');
+        const dataDB = await response.json();
+
+        const arrayTasks = []
+
+
+        for (let id in dataDB) {
+          arrayTasks.push(dataDB[id]);
+        }
+        commit('load', arrayTasks)
+        console.log(arrayTasks);
+
+      } catch (err) {
+        console.error('Upps!, Something Wrong: ', err)
+      }
+    },
+
+    async setTareas({ commit }, tarea) {
+      try {
+        const response = await fetch(`https://crud-form-vue-default-rtdb.firebaseio.com/tareas/${tarea.id}.json`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(tarea)
+        });
+        const db = await response.json();
+        console.log(db);
+        commit('set', tarea);
+      } catch (err) {
+        console.error('Opps Something Wronng', err)
+      }
     },
 
     deleteTarea({ commit }, id) {
@@ -56,16 +85,7 @@ export default createStore({
 
     updateTarea({ commit }, tarea) {
       commit('update', tarea);
-    },
-
-    uploadLocalStorage({ commit }) {
-      if (localStorage.getItem('tareas')) {
-        console.log('Exists');
-        const tareas = JSON.parse(localStorage.getItem('tareas'));
-        commit('upload', tareas);
-        return;
-      }
-      localStorage.setItem('tareas', JSON.stringify([]));
     }
+
   }
 })

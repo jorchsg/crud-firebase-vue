@@ -19,11 +19,11 @@
     },
 
     methods: {
-      ...mapActions(['uploadLocalStorage'])
+      ...mapActions(['loadLocalStorage'])
     },
 
     created(){
-      this.uploadLocalStorage();
+      this.loadLocalStorage();
     },
 
   };
