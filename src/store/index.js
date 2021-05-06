@@ -73,8 +73,15 @@ export default createStore({
       }
     },
 
-    deleteTarea({ commit }, id) {
-      commit('delete', id);
+    async deleteTarea({ commit }, id) {
+      try {
+        await fetch(`https://crud-form-vue-default-rtdb.firebaseio.com/tareas/${id}.json`, {
+          method: 'Delete'
+        });
+        commit('delete', id);
+      } catch (error) {
+        console.error('Ups, something wrong: ', error);
+      }
     },
 
     editTarea({ commit }, id) {
