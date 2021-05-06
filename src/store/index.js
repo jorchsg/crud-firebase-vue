@@ -46,12 +46,10 @@ export default createStore({
 
         const arrayTasks = []
 
-
         for (let id in dataDB) {
           arrayTasks.push(dataDB[id]);
         }
         commit('load', arrayTasks)
-        console.log(arrayTasks);
 
       } catch (err) {
         console.error('Upps!, Something Wrong: ', err)
@@ -83,8 +81,20 @@ export default createStore({
       commit('edit', id);
     },
 
-    updateTarea({ commit }, tarea) {
-      commit('update', tarea);
+    async updateTarea({ commit }, tarea) {
+      try {
+
+        const response = await fetch(`https://crud-form-vue-default-rtdb.firebaseio.com/tareas/${tarea.id}.json`, {
+          method: 'PATCH',
+          body: JSON.stringify(tarea)
+        });
+        const dataDB = await response.json();
+        console.log(dataDB);
+        commit('update', dataDB);
+
+      } catch (err) {
+        console.error('Ups, something wrong: ', err)
+      }
     }
 
   }
